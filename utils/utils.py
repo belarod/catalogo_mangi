@@ -1,6 +1,5 @@
 import os
 
-
 class Utils:
     @staticmethod
     def clear_screen():

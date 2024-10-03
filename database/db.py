@@ -1,5 +1,5 @@
 import sqlite3
-from database.db import check_email
+#from database.db import check_email
 from models.restaurant import Restaurant
 
 
@@ -61,27 +61,27 @@ class DB:
         record = cur.fetchone()
         if record is None:
             return None
-        restaurante = Restaurante(pk=record[0],
+        restaurant = Restaurant(pk=record[0],
                            nome_restaurante=record[1],
                            comissao=record[2],
                            email=record[3],
                            password=record[4])
-        return restaurante
+        return restaurant
 
-    def check_email(self, email: str, password: None): #parei aq!!
-        cur = self.connection.cursor()
-
-        # procura email
-        cur.execute('''
-                        SELECT email 
-                        FROM restaurante 
-                        WHERE email = ? and password = ?
-                        ''', (email, password))
-        record = cur.fetchone()
-        if record is None:
-            return None
-        registered_email = Restaurant(email=record)
-        return registered_email
+    # def check_email(self, email: str, password: None): #parei aq!!
+    #     cur = self.connection.cursor()
+    #
+    #     # procura email
+    #     cur.execute('''
+    #                     SELECT email
+    #                     FROM restaurante
+    #                     WHERE email = ? and password = ?
+    #                     ''', (email, password))
+    #     record = cur.fetchone()
+    #     if record is None:
+    #         return None
+    #     registered_email = Restaurant(email=record)
+    #     return registered_email
 
     def get_user(self, email: str):
         cur = self.connection.cursor()
