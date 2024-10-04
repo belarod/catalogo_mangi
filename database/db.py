@@ -68,6 +68,9 @@ class DB:
                            password=record[4])
         return restaurant
     
+    def access_restaurant():
+        pass
+    
 
     # def check_email(self, email: str, password: None): #parei aq!!
     #     cur = self.connection.cursor()

@@ -82,13 +82,16 @@ class App:
         else:
             self.current_restaurant = restaurant
             print(f'Bem vindo, {restaurant.name_restaurant} seu ID é {restaurant.pk} e a comissão {restaurant.commission}.')
-            self.show_restaurant_pannel()
+            self.show_restaurant_pannel(restaurant)
 
     #mostra painel do restaurante
-    def show_restaurant_pannel(self):
+    def show_restaurant_pannel(self, restaurant):
         Utils.clear_screen()
-        print('painel do restaurante')
-        #mostrar produtos cadastrados
+        #puxar nome do restaurante dar print 
+        self.current_restaurant = restaurant
+        print(f'-- Produtos do {restaurant.name_restaurant} --')
+        
+        #select produtos ce fazer loop p mostrar 1 a 1
         #1 cadastrar prod (insert
         #2 apagar prod (delete
         #3 alterar commission (update
