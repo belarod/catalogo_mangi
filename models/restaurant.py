@@ -14,8 +14,8 @@ class Restaurant:
         self.commission = commission
         self.name_restaurant = name_restaurant
 
-    def __str__(self):
-        return f'{self.name_restaurant}'
+    """ def __str__(self):
+        return f'{self.name_restaurant}' """
 
     @staticmethod
     def verify_name_restaurant(name_restaurant):

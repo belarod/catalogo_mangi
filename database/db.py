@@ -67,6 +67,7 @@ class DB:
                            email=record[3],
                            password=record[4])
         return restaurant
+    
 
     # def check_email(self, email: str, password: None): #parei aq!!
     #     cur = self.connection.cursor()
@@ -83,7 +84,7 @@ class DB:
     #     registered_email = Restaurant(email=record)
     #     return registered_email
 
-    # def get_user(self, email: str):
+    # def get_restaurant(self, email: str):
     #     cur = self.connection.cursor()
     #
     #     # Search for the record
@@ -97,7 +98,7 @@ class DB:
     #     user = Restaurant(pk=record[0], email=record[1], password=record[2])
     #     return user
     #
-    # def delete_user(self, email: str):
+    # def delete_restaurant(self, email: str):
     #     cur = self.connection.cursor()
     #
     #     # Delete the record
