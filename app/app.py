@@ -11,20 +11,6 @@ class App:
         self.current_user = None
 
     def start_app(self):
-
-        #self.db.create_restaurant(restaurant)
-        #
-        # user = self.db.login(email, senha)
-        # if user is None:
-        #     print('Erro no login')
-        # else:
-        #     print(f'Bem vindo, {user.nome_restaurante} seu ID é {user.pk} e a comissao {user.comissao}')
-        #     self.current_user = user
-        #
-        # self.current_user.pk
-
-        # print(user)
-        # # Código acima pode ser descartado
         self.show_main_menu()
 
     def show_main_menu(self):
@@ -70,18 +56,32 @@ class App:
         password = ''
         while not Restaurant.verify_password(password):
             print('*Deve conter ao menos uma letra maiúscila, uma minúscula e um número.')
-            password = input('Password: ')
+            password = input('Senha: ')
 
 
         register_restaurant = Restaurant(pk=None, name_restaurant=name_restaurant, commission=commission, email=email, password=password)
         app = DB("example.db")
-        DB.create_restaurant(app, register_restaurant)
+        DB.create_restaurant(app, register_restaurant) #insere
 
     def show_login_menu(self):
         Utils.clear_screen()
+
+        print('-- Login --')
+        email = input('Email: ')
+        password = input('Senha: ')
         user = self.db.login(email=email, password=password)
-        if user is None:
-            print('Erro no login')
+        if user is None: #se login estiver incorreto ou nao existir
+            print('Credenciais inválidas. Não possui cadastro? Registre-se agora mesmo!')
+            self.show_register_menu()
         else:
-            print(f'Bem vindo, {user.nome_restaurante} seu ID é {user.pk} e a comissao {user.comissao}')
             self.current_user = user
+            print(f'Bem vindo, {user.name_restaurant} seu ID é {user.pk} e a comissão {user.commission}.')
+            self.show_restaurant_pannel()
+
+    def show_restaurant_pannel(self):
+        #mostrar produtos cadastrados
+        #1 cadastrar prod (insert
+        #2 apagar prod (delete
+        #3 alterar commission (update
+        #4 logout (user = none e retornar ao menu principal
+        pass

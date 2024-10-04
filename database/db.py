@@ -10,7 +10,7 @@ class DB:
         self.connection = sqlite3.connect(db_name)
         self.__setup_tables()
 
-    def __setup_tables(self):
+    def __setup_tables(self): #cria as tabelas, caso não existam
         cur = self.connection.cursor()  # Create a cursor object to interact with the database
 
         # Create table if it doesn't exist
@@ -36,7 +36,7 @@ class DB:
 
         self.connection.commit()  # Commit the transaction
 
-    def create_restaurant(self, restaurant: Restaurant):
+    def create_restaurant(self, restaurant: Restaurant): #parametro espera um objeto do tipo Restaurant
         # Create a cursor object to interact with the database
         cur = self.connection.cursor()
 
@@ -48,25 +48,25 @@ class DB:
 
         # Commit the transaction
         self.connection.commit()
-    #
-    # def login(self, email: str, password: str):
-    #     cur = self.connection.cursor()
-    #
-    #     # Search for the record
-    #     cur.execute('''
-    #             SELECT id, name_restaurant, commission, email, password
-    #             FROM restaurant
-    #             WHERE email = ? and password = ?
-    #             ''', (email, password))
-    #     record = cur.fetchone()
-    #     if record is None:
-    #         return None
-    #     restaurant = Restaurant(pk=record[0],
-    #                        name_restaurant=record[1],
-    #                        commission=record[2],
-    #                        email=record[3],
-    #                        password=record[4])
-    #     return restaurant
+
+    def login(self, email: str, password: str):
+        cur = self.connection.cursor()
+
+        # Search for the record
+        cur.execute('''
+                SELECT id, name_restaurant, commission, email, password
+                FROM restaurant
+                WHERE email = ? and password = ?
+                ''', (email, password))
+        record = cur.fetchone()
+        if record is None:
+            return None
+        restaurant = Restaurant(pk=record[0],
+                           name_restaurant=record[1],
+                           commission=record[2],
+                           email=record[3],
+                           password=record[4])
+        return restaurant
 
     # def check_email(self, email: str, password: None): #parei aq!!
     #     cur = self.connection.cursor()
