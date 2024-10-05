@@ -1,6 +1,7 @@
 import sqlite3
 #from database.db import check_email
 from models.restaurant import Restaurant
+from models.product import Product
 
 
 class DB:
@@ -68,8 +69,37 @@ class DB:
                            password=record[4])
         return restaurant
     
-    def access_restaurant():
-        pass
+    def show_products(self, fk_id_restaurant): #parei aq!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+        cur = self.connection.cursor()
+
+        # Search for the record
+        cur.execute('''
+                SELECT pk, name, price
+                FROM product
+                WHERE fk = ?
+                ''', (fk_id_restaurant))
+        
+        record = cur.fetchall()
+        product_list = []
+        
+        
+        if record is None:
+            return None
+        else:
+            for product in record:
+                product = Product(pk= product[0], name_product= product[1], price= product[3], fk_id_restaurant= fk_id_restaurant)
+                product_list.append(product)
+        return product_list
+    
+    def insert_product(self, product: Product):
+        cur = self.connection.cursor()
+        
+        cur.execute('''
+                INSERT INTO name_product, price, fk_id_restaurant
+                VALUES (?, ?, ?)
+                ''', (product.name_product, product.price, product.fk_id_restaurant))
+        
+        self.connection.commit()
     
 
     # def check_email(self, email: str, password: None): #parei aq!!

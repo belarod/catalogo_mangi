@@ -91,9 +91,38 @@ class App:
         self.current_restaurant = restaurant
         print(f'-- Produtos do {restaurant.name_restaurant} --')
         
-        #select produtos ce fazer loop p mostrar 1 a 1
+        while True:
+            print('1. Cadastrar produto')
+            print('2. Apagar produto')
+            print('3. Alterar comissão')
+            print('4. Logout')
+
+            res = input('Escolha uma opção: ')
+            
+            if res == '1':
+                Utils.clear_screen()
+               #cadastrar prod
+                break
+            elif res == '2':
+                #apagar prod
+                break
+            elif res == '3':
+                #alterar comissao
+                break
+            elif res == '4':
+                #logout
+                self.current_restaurant = None
+                self.show_main_menu()
+
+            else:
+                Utils.clear_screen()
+                print('Esta opção não é valida, digite um dos números acima.')
+        
+        
+        #select produtos e fazer loop p mostrar 1 a 1
         #1 cadastrar prod (insert
         #2 apagar prod (delete
         #3 alterar commission (update
         #4 logout (user = none e retornar ao menu principal
-        pass
+        
+        

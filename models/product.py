@@ -1,11 +1,11 @@
 class Product:
     def __init__(self,
                  pk: int,
-                 name: str,
+                 name_product: str,
                  price: int,
                  fk_id_restaurant: int):
         self.pk = pk
-        self.name = name
+        self.name_product = name_product
         self.price = price
         self.fk_id_restaurant = fk_id_restaurant
     @staticmethod
