@@ -1,3 +1,4 @@
+import time
 from multiprocessing.resource_tracker import register
 from database.db import DB
 
@@ -11,11 +12,16 @@ class App:
         self.db = db
         self.current_restaurant = None
 
+
+
     def start_app(self):
+        """ Inicia o app. """
         self.show_main_menu()
 
-    #mostra menu principal
+
+
     def show_main_menu(self):
+        """ Mostra menu principal. """
         Utils.clear_screen()
         while True:
             print('-- Tela Inicial --')
@@ -38,8 +44,8 @@ class App:
 
 
 
-    #abre menu para registro
     def show_register_menu(self):
+        """ Abre menu para registro. """
         Utils.clear_screen()
         print('-- Registre seu restaurante --')
 
@@ -62,19 +68,28 @@ class App:
         while not Restaurant.verify_password(password):
             print('*Deve conter ao menos uma letra maiúscila, uma minúscula e um número.')
             password = input('Senha: ')
+            
+        app = DB("example.db")    
+        if not DB.verify_existing_email(app, email):
+            msg_first_login = 'Primeiro login!'
+            register_restaurant = Restaurant(pk=None, name_restaurant=name_restaurant, commission=commission, email=email, password=password, last_login=msg_first_login)
+            
+            app = DB("example.db")
+            DB.create_restaurant(app, register_restaurant)
+            Utils.clear_screen()
+            print(f'O restaurante {name_restaurant} foi registrado!')
+            Utils.sleep(5)
+            self.show_main_menu()
+        else:
+            Utils.clear_screen()
+            print(f'Este email já está em uso.')
+            Utils.sleep(5)
+            self.show_main_menu()
 
-        register_restaurant = Restaurant(pk=None, name_restaurant=name_restaurant, commission=commission, email=email, password=password)
-        app = DB("example.db")
-        DB.create_restaurant(app, register_restaurant) #insere
-        Utils.clear_screen()
-        print(f'O restaurante {name_restaurant} foi registrado!')
-        Utils.sleep(5)
-        self.show_main_menu()
 
 
-
-    #abre menu para login
     def show_login_menu(self):
+        """ Abre menu para login """
         Utils.clear_screen()
 
         print('-- Login --')
@@ -83,15 +98,28 @@ class App:
         restaurant = self.db.login(email=email, password=password)
         
         if restaurant is None: #se login estiver incorreto ou nao existir
-            Utils.clear_screen()
             print('Credenciais inválidas. Não possui cadastro? Registre-se agora mesmo!')
+            Utils.sleep(5)
+            Utils.clear_screen()
             self.show_main_menu()
         else:
             self.current_restaurant = restaurant
-            print(f'Bem vindo, {restaurant.name_restaurant} seu ID é {restaurant.pk} e a comissão {restaurant.commission}.')
+            
+            app = DB("example.db")
+            current_date_login = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+            last_login = DB.pull_last_login(app, restaurant.pk)
+            
+            Utils.clear_screen()
+            print(f'Bem vindo, {restaurant.name_restaurant} seu ID é {restaurant.pk} e a comissão {restaurant.commission}%.')
+            print(f'Último login: {last_login[0]}')
+            Utils.sleep(10)
+            
+            DB.push_current_login(app, current_date_login, restaurant.pk)
+            
             self.show_restaurant_pannel(restaurant)
 
     def show_product_list(self, restaurant):
+        """ Mostra lista de produtos, se existente, de um respectivo restaurante. """
         self.current_restaurant = restaurant
         app = DB("example.db")
         product_list = DB.show_products(app, restaurant.pk)
@@ -103,8 +131,8 @@ class App:
 
 
 
-    #mostra painel do restaurante
     def show_restaurant_pannel(self, restaurant):
+        """ Mostra painel do restaurante """
         Utils.clear_screen()
         app = DB("example.db")
         current_commission = DB.show_current_commission(app, restaurant.pk)
@@ -178,9 +206,9 @@ class App:
                     print('Esta opção não é valida, digite um dos números acima.')
         
                 
-                
-    #insere produto            
+                           
     def show_insert_product(self, restaurant):
+        """ Insere um produto. """
         print('-- Cadastrar produto --')
         
         name_product = ''
@@ -205,6 +233,7 @@ class App:
         
         
     def show_delete_product(self, restaurant):
+        """ Deleta um produto """
         print('-- Deletar produto --')
         product_list = self.show_product_list(restaurant)
         for product in product_list:
@@ -224,7 +253,8 @@ class App:
         
             
             
-    def show_alter_commission(self, restaurant): #parei aqui
+    def show_alter_commission(self, restaurant):
+        """ Altera comissão. """
         app = DB("example.db")
         DB.show_highest_commission(app) 
         

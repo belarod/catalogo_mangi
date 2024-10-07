@@ -11,17 +11,18 @@ class DB:
         self.connection = sqlite3.connect(db_name)
         self.__setup_tables()
 
-    def __setup_tables(self): #cria as tabelas, caso não existam
-        cur = self.connection.cursor()  # Create a cursor object to interact with the database
+    def __setup_tables(self):
+        """ Cria tabelas, caso não existam """
+        cur = self.connection.cursor()
 
-        # Create table if it doesn't exist
         cur.execute('''
             CREATE TABLE IF NOT EXISTS restaurant (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name_restaurant TEXT NOT NULL,
                 commission INT NOT NULL,
                 email TEXT NOT NULL,
-                password TEXT NOT NULL
+                password TEXT NOT NULL,
+                last_login TEXT DEFAULT 'Este é seu primeiro login!'
             )
             ''')
 
@@ -38,8 +39,8 @@ class DB:
         self.connection.commit()  # Commit the transaction
         cur.close()
 
-    def create_restaurant(self, restaurant: Restaurant): #parametro espera um objeto do tipo Restaurant
-        # Create a cursor object to interact with the database
+    def create_restaurant(self, restaurant: Restaurant):
+        """ Cria restaurante de acordo com os inputs do app. """
         cur = self.connection.cursor()
 
         # Insert a record into the table
@@ -53,11 +54,12 @@ class DB:
         cur.close()
 
     def login(self, email: str, password: str):
+        """ Realiza login se caso a combinação exista no DB, e atribui o usuário de acordo com o restaurante acessado. Retorna instância de Restaurant. """
         cur = self.connection.cursor()
 
         # Search for the record
         cur.execute('''
-                SELECT id, name_restaurant, commission, email, password
+                SELECT id, name_restaurant, commission, email, password, last_login
                 FROM restaurant
                 WHERE email = ? and password = ?
                 ''', (email, password))
@@ -69,11 +71,13 @@ class DB:
                            name_restaurant=record[1],
                            commission=record[2],
                            email=record[3],
-                           password=record[4])
+                           password=record[4],
+                           last_login=record[5])
         return restaurant
     
     
-    def show_products(self, fk_id_restaurant):
+    def show_products(self, fk_id_restaurant: int):
+        """ Consulta DB para retornar uma lista de produtos do respectivo restaurante. """
         cur = self.connection.cursor()
 
         # Search for the record
@@ -97,6 +101,7 @@ class DB:
         return product_list
     
     def insert_product(self, product: Product):
+        """ Insere produto no DB, de acordo com inputs do app. """
         cur = self.connection.cursor()
         
         cur.execute('''
@@ -109,7 +114,8 @@ class DB:
         
         
         
-    def delete_product(self, pk):
+    def delete_product(self, pk: int):
+        """ Deleta produto no DB, de acordo com inputs do app. """
         cur = self.connection.cursor()
         
         cur.execute('''
@@ -120,7 +126,8 @@ class DB:
         self.connection.commit()
         cur.close()
         
-    def alter_commission(self, pk, new_commission):
+    def alter_commission(self, pk: int, new_commission: int):
+        """ Altera comissão do respectivo restaurante, de acordo com inputs do app. """
         cur = self.connection.cursor()
         
         cur.execute('''
@@ -135,6 +142,7 @@ class DB:
 
 
     def show_highest_commission(self):
+        """ Retorna variável com maior comissão existente entre todos restaurantes registrados. """
         cur = self.connection.cursor()
         
         cur.execute('''
@@ -154,7 +162,8 @@ class DB:
         
         
         
-    def show_current_commission(self, pk):
+    def show_current_commission(self, pk: int):
+        """ Consulta comissão atual de respectivo restaurante. """
         cur = self.connection.cursor()
         
         cur.execute('''
@@ -169,42 +178,48 @@ class DB:
             return current_commission[0]
         
         cur.close()
+        
+    def push_current_login(self, current_date_login: str, pk: int):
+        """ Insere no DB data/hora em que foi acessado. """
+        cur = self.connection.cursor()
+        
+        cur.execute('''
+                UPDATE restaurant
+                SET last_login = ?
+                WHERE id = ?
+                ''', (current_date_login, pk))
+        
+        self.connection.commit()
+        cur.close()
+        
+    def pull_last_login(self, pk: int):
+        """ Consulta no DB, ÚLTIMA data/hora em que foi acessado. """
+        cur = self.connection.cursor()
+        
+        cur.execute('''
+                SELECT last_login
+                FROM restaurant
+                WHERE id = ?
+                ''', (pk,))
+        
+        last_login = cur.fetchone()
+        cur.close()
+        return last_login
 
-    # def check_email(self, email: str, password: None): #parei aq!!
-    #     cur = self.connection.cursor()
-    #
-    #     # procura email
-    #     cur.execute('''
-    #                     SELECT email
-    #                     FROM restaurante
-    #                     WHERE email = ? and password = ?
-    #                     ''', (email, password))
-    #     record = cur.fetchone()
-    #     if record is None:
-    #         return None
-    #     registered_email = Restaurant(email=record)
-    #     return registered_email
 
-    # def get_restaurant(self, email: str):
-    #     cur = self.connection.cursor()
-    #
-    #     # Search for the record
-    #     cur.execute('''
-    #     SELECT * FROM users WHERE email = ?
-    #     ''', (email,))
-    #     record = cur.fetchone()
-    #     # record = cur.fetchall()
-    #     if record is None:
-    #         return None
-    #     user = Restaurant(pk=record[0], email=record[1], password=record[2])
-    #     return user
-    #
-    # def delete_restaurant(self, email: str):
-    #     cur = self.connection.cursor()
-    #
-    #     # Delete the record
-    #     cur.execute('''
-    #     DELETE FROM users WHERE name = ?
-    #     ''', (email,))
-    #
-    #     self.connection.commit()
+    def verify_existing_email(self, email: str):
+        """ Consulta no DB se já existe o parâmetro (email) cadastrado. Retorna True, se não existe, False, se já existe. """
+        cur = self.connection.cursor()
+    
+        cur.execute('''
+                        SELECT email
+                        FROM restaurant
+                        WHERE email = ?
+                        ''', (email,))
+    
+        record = cur.fetchone()
+        cur.close()
+        
+        if record is None:
+            return False
+        return True

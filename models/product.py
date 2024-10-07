@@ -13,20 +13,14 @@ class Product:
         
     @staticmethod
     def verify_name_product(name_product):
+        """ Verifica se nome do produto tem 5 ou mais letras. """
         if len(name_product) >= 5:
             return True
         return False
     
     @staticmethod
     def verify_price(price):
+        """ Verifica se o preço é maior que zero. """
         if price > 0:
             return True
         return False
-    
-"""@staticmethod
-    def verify_delete_input(pk_product):
-        pk_product = re.sub(r'[^0-9]', '', pk_product)
-        if pk_product:
-            return pk_product
-        else:
-            return None  """
