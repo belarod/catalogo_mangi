@@ -116,7 +116,7 @@ class App:
             print('Este restaurante ainda não possui cardápio.')
             while True:
                 print('1. Cadastrar produto')
-                print(f'2. Alterar comissão (Atual:{current_commission})')
+                print(f'2. Alterar comissão (Atual: {current_commission})')
                 print('3. Logout')
 
                 res = input('Escolha uma opção: ')
@@ -132,7 +132,9 @@ class App:
                     self.show_alter_commission(restaurant)
                     break
                 elif res == '3':
-                    #logout
+                    Utils.clear_screen()
+                    print(f'Até logo, {restaurant.name_restaurant}!')
+                    Utils.sleep(5)
                     self.current_restaurant = None
                     self.show_main_menu()
 
@@ -145,7 +147,7 @@ class App:
             while True:
                 print('1. Cadastrar produto')
                 print('2. Apagar produto')
-                print('3. Alterar comissão')
+                print(f'3. Alterar comissão -- atual: {current_commission}%')
                 print('4. Logout')
 
                 res = input('Escolha uma opção: ')
@@ -165,7 +167,9 @@ class App:
                     self.show_alter_commission(restaurant)
                     break
                 elif res == '4':
-                    #logout
+                    Utils.clear_screen()
+                    print(f'Até logo, {restaurant.name_restaurant}!')
+                    Utils.sleep(5)
                     self.current_restaurant = None
                     self.show_main_menu()
 
@@ -202,7 +206,9 @@ class App:
         
     def show_delete_product(self, restaurant):
         print('-- Deletar produto --')
-        self.show_product_list(restaurant)
+        product_list = self.show_product_list(restaurant)
+        for product in product_list:
+                print(f'-- {product.name_product:<20} -- ID: {product.pk:<5} -- Preço: {product.price/100:.2f}')
         
         pk_product = 0
         while not int(pk_product):
