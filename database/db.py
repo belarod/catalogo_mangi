@@ -36,6 +36,7 @@ class DB:
             ''')
 
         self.connection.commit()  # Commit the transaction
+        cur.close()
 
     def create_restaurant(self, restaurant: Restaurant): #parametro espera um objeto do tipo Restaurant
         # Create a cursor object to interact with the database
@@ -49,6 +50,7 @@ class DB:
 
         # Commit the transaction
         self.connection.commit()
+        cur.close()
 
     def login(self, email: str, password: str):
         cur = self.connection.cursor()
@@ -60,6 +62,7 @@ class DB:
                 WHERE email = ? and password = ?
                 ''', (email, password))
         record = cur.fetchone()
+        cur.close()
         if record is None:
             return None
         restaurant = Restaurant(pk=record[0],
@@ -69,7 +72,8 @@ class DB:
                            password=record[4])
         return restaurant
     
-    def show_products(self, fk_id_restaurant): #parei aq!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    
+    def show_products(self, fk_id_restaurant):
         cur = self.connection.cursor()
 
         # Search for the record
@@ -80,6 +84,7 @@ class DB:
                 ''', (fk_id_restaurant,))
         
         record = cur.fetchall()
+        cur.close()
         product_list = []
         
         
@@ -100,6 +105,7 @@ class DB:
                 ''', (product.name_product, product.price, product.fk_id_restaurant))
         
         self.connection.commit()
+        cur.close()
         
         
         
@@ -112,7 +118,57 @@ class DB:
                 ''', (pk,))
         
         self.connection.commit()
-    
+        cur.close()
+        
+    def alter_commission(self, pk, new_commission):
+        cur = self.connection.cursor()
+        
+        cur.execute('''
+                UPDATE restaurant
+                SET commission = ?
+                WHERE id = ?
+                ''', (new_commission, pk))
+        
+        self.connection.commit()
+        cur.close()
+
+
+
+    def show_highest_commission(self):
+        cur = self.connection.cursor()
+        
+        cur.execute('''
+                SELECT commission
+                FROM restaurant
+                ORDER BY commission DESC
+                LIMIT 1
+                ''')
+        
+        highest_commission = cur.fetchone()
+        
+        if highest_commission:
+            print(f"The highest commission is: {highest_commission[0]}")
+            return highest_commission
+        
+        cur.close()
+        
+        
+        
+    def show_current_commission(self, pk):
+        cur = self.connection.cursor()
+        
+        cur.execute('''
+                SELECT commission
+                FROM restaurant
+                WHERE id = ?
+                ''', (pk,))
+        
+        current_commission = cur.fetchone()
+        
+        if current_commission:
+            return current_commission[0]
+        
+        cur.close()
 
     # def check_email(self, email: str, password: None): #parei aq!!
     #     cur = self.connection.cursor()

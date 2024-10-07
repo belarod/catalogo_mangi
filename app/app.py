@@ -48,7 +48,7 @@ class App:
             print('*Nome deve conter pelo menos 10 caracteres.')
             name_restaurant = input('Nome do restaurante: ')
 
-        commission = 0
+        commission = 101
         while not Restaurant.verify_commission(commission):
             print('*Valor deve ser maior ou igual a zero.')
             commission = int(input('Comissão (em porcentagem): '))
@@ -56,7 +56,7 @@ class App:
         email = ''
         while not Restaurant.verify_email(email):
             print('*Deve ser um email válido.')
-            email = input('Email: ')
+            email = input('Email: ').lower()
 
         password = ''
         while not Restaurant.verify_password(password):
@@ -67,7 +67,8 @@ class App:
         app = DB("example.db")
         DB.create_restaurant(app, register_restaurant) #insere
         Utils.clear_screen()
-        print('Seu restaurante foi registrado!')
+        print(f'O restaurante {name_restaurant} foi registrado!')
+        Utils.sleep(5)
         self.show_main_menu()
 
 
@@ -77,7 +78,7 @@ class App:
         Utils.clear_screen()
 
         print('-- Login --')
-        email = input('Email: ')
+        email = input('Email: ').lower()
         password = input('Senha: ')
         restaurant = self.db.login(email=email, password=password)
         
@@ -96,51 +97,82 @@ class App:
         product_list = DB.show_products(app, restaurant.pk)
         
         if product_list is None:
-            print("Ainda não possui cardápio.")
+            return None
         else:
-            for product in product_list:
-                print(f'{product.name_product:<20} --- ID: {product.pk:<5}')
+            return product_list
 
 
 
     #mostra painel do restaurante
     def show_restaurant_pannel(self, restaurant):
         Utils.clear_screen()
+        app = DB("example.db")
+        current_commission = DB.show_current_commission(app, restaurant.pk)
         print(f'-- Produtos do {restaurant.name_restaurant} --')
-        self.show_product_list(restaurant)
+        #print(f'-- Comissão atual: {current_commission} --')
+        product_list = self.show_product_list(restaurant)
         
-        while True:
-            print('1. Cadastrar produto')
-            print('2. Apagar produto')
-            print('3. Alterar comissão')
-            print('4. Logout')
+        if product_list is None:
+            print('Este restaurante ainda não possui cardápio.')
+            while True:
+                print('1. Cadastrar produto')
+                print(f'2. Alterar comissão (Atual:{current_commission})')
+                print('3. Logout')
 
-            res = input('Escolha uma opção: ')
-            
-            self.current_restaurant = restaurant
-            app = DB("example.db")
-            
-            if res == '1':
-                Utils.clear_screen()
-                self.show_insert_product(restaurant)
-                break
-            elif res == '2':
-                Utils.clear_screen()
-                self.show_delete_product(restaurant)
-                break
-            elif res == '3':
-                Utils.clear_screen()
-                self.show_alter_commission()
-                break
-            elif res == '4':
-                #logout
-                self.current_restaurant = None
-                self.show_main_menu()
-
-            else:
-                Utils.clear_screen()
-                print('Esta opção não é valida, digite um dos números acima.')
+                res = input('Escolha uma opção: ')
                 
+                self.current_restaurant = restaurant
+                
+                if res == '1':
+                    Utils.clear_screen()
+                    self.show_insert_product(restaurant)
+                    break
+                elif res == '2':
+                    Utils.clear_screen()
+                    self.show_alter_commission(restaurant)
+                    break
+                elif res == '3':
+                    #logout
+                    self.current_restaurant = None
+                    self.show_main_menu()
+
+                else:
+                    Utils.clear_screen()
+                    print('Esta opção não é valida, digite um dos números acima.')
+        else:
+            for product in product_list:
+                print(f'-- {product.name_product:<20} -- ID: {product.pk:<5} -- Preço: {product.price/100:.2f}')
+            while True:
+                print('1. Cadastrar produto')
+                print('2. Apagar produto')
+                print('3. Alterar comissão')
+                print('4. Logout')
+
+                res = input('Escolha uma opção: ')
+                
+                self.current_restaurant = restaurant
+                
+                if res == '1':
+                    Utils.clear_screen()
+                    self.show_insert_product(restaurant)
+                    break
+                elif res == '2':
+                    Utils.clear_screen()
+                    self.show_delete_product(restaurant)
+                    break
+                elif res == '3':
+                    Utils.clear_screen()
+                    self.show_alter_commission(restaurant)
+                    break
+                elif res == '4':
+                    #logout
+                    self.current_restaurant = None
+                    self.show_main_menu()
+
+                else:
+                    Utils.clear_screen()
+                    print('Esta opção não é valida, digite um dos números acima.')
+        
                 
                 
     #insere produto            
@@ -154,7 +186,7 @@ class App:
 
         price = 0
         while not Product.verify_price(price):
-            print('*Valor deve ser maior que zero.')
+            print('*Digite o valor em centavos')
             price = int(input('Preço: '))
         
         self.current_restaurant = restaurant
@@ -187,10 +219,17 @@ class App:
             
             
     def show_alter_commission(self, restaurant): #parei aqui
+        app = DB("example.db")
+        DB.show_highest_commission(app) 
+        
         new_commission = 0
+        pk = restaurant.pk
         while not int(new_commission) and Restaurant.verify_commission(new_commission):
             print('Em porcentagem, de 0 a 100.')
             new_commission = input('Nova comissão: ')
             
-        app = DB("example.db")
-        DB.alter_product(app, new_commission)
+        DB.alter_commission(app, pk, new_commission)
+        Utils.clear_screen()
+        print(f'A sua comissão foi alterada para {new_commission}%.')
+        Utils.sleep(5)
+        self.show_restaurant_pannel(restaurant)

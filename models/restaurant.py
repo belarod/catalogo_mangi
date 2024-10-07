@@ -25,7 +25,7 @@ class Restaurant:
 
     @staticmethod
     def verify_commission(commission):
-        if commission >= 0:
+        if commission >= 0 and commission <= 100:
             return True
         return False
 
