@@ -1,3 +1,5 @@
+import re
+
 class Product:
     def __init__(self,
                  pk: int,
@@ -8,6 +10,7 @@ class Product:
         self.name_product = name_product
         self.price = price
         self.fk_id_restaurant = fk_id_restaurant
+        
     @staticmethod
     def verify_name_product(name_product):
         if len(name_product) >= 5:
@@ -19,3 +22,11 @@ class Product:
         if price > 0:
             return True
         return False
+    
+"""@staticmethod
+    def verify_delete_input(pk_product):
+        pk_product = re.sub(r'[^0-9]', '', pk_product)
+        if pk_product:
+            return pk_product
+        else:
+            return None  """

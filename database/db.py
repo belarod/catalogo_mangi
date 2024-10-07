@@ -29,9 +29,9 @@ class DB:
             CREATE TABLE IF NOT EXISTS product (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name_product TEXT NOT NULL,
-                price FLOAT NOT NULL,
-                id_restaurant INT NOT NULL,
-                FOREIGN KEY (id_restaurant) REFERENCES restaurant(id) 
+                price INT NOT NULL,
+                fk_id_restaurant INT NOT NULL,
+                FOREIGN KEY (fk_id_restaurant) REFERENCES restaurant(id) 
             )
             ''')
 
@@ -74,30 +74,42 @@ class DB:
 
         # Search for the record
         cur.execute('''
-                SELECT pk, name, price
+                SELECT id, name_product, price
                 FROM product
-                WHERE fk = ?
-                ''', (fk_id_restaurant))
+                WHERE fk_id_restaurant = ?
+                ''', (fk_id_restaurant,))
         
         record = cur.fetchall()
         product_list = []
         
         
-        if record is None:
+        if not record:
             return None
         else:
             for product in record:
-                product = Product(pk= product[0], name_product= product[1], price= product[3], fk_id_restaurant= fk_id_restaurant)
-                product_list.append(product)
+                product_inst = Product(pk=product[0], name_product=product[1], price=product[2], fk_id_restaurant=fk_id_restaurant)
+                product_list.append(product_inst)
         return product_list
     
     def insert_product(self, product: Product):
         cur = self.connection.cursor()
         
         cur.execute('''
-                INSERT INTO name_product, price, fk_id_restaurant
+                INSERT INTO product (name_product, price, fk_id_restaurant)
                 VALUES (?, ?, ?)
                 ''', (product.name_product, product.price, product.fk_id_restaurant))
+        
+        self.connection.commit()
+        
+        
+        
+    def delete_product(self, pk):
+        cur = self.connection.cursor()
+        
+        cur.execute('''
+                DELETE FROM product
+                WHERE id = ?
+                ''', (pk,))
         
         self.connection.commit()
     
