@@ -56,8 +56,14 @@ class App:
 
         commission = 101
         while not Restaurant.verify_commission(commission):
+            app = DB("example.db")
+            DB.show_highest_commission(app)
             print('*Valor deve ser maior ou igual a zero.')
-            commission = int(input('Comissão (em porcentagem): '))
+    
+            try:
+                commission = int(input('Comissão (em porcentagem): '))
+            except ValueError:
+                print('*Valor deve ser maior ou igual a zero.')
 
         email = ''
         while not Restaurant.verify_email(email):
@@ -71,8 +77,7 @@ class App:
             
         app = DB("example.db")    
         if not DB.verify_existing_email(app, email):
-            msg_first_login = 'Primeiro login!'
-            register_restaurant = Restaurant(pk=None, name_restaurant=name_restaurant, commission=commission, email=email, password=password, last_login=msg_first_login)
+            register_restaurant = Restaurant(pk=None, name_restaurant=name_restaurant, commission=commission, email=email, password=password, last_login=None)
             
             app = DB("example.db")
             DB.create_restaurant(app, register_restaurant)
@@ -106,7 +111,7 @@ class App:
             self.current_restaurant = restaurant
             
             app = DB("example.db")
-            current_date_login = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())
+            current_date_login = time.strftime("%d-%m-%Y %H:%M:%S", time.localtime())
             last_login = DB.pull_last_login(app, restaurant.pk)
             
             Utils.clear_screen()
@@ -137,7 +142,6 @@ class App:
         app = DB("example.db")
         current_commission = DB.show_current_commission(app, restaurant.pk)
         print(f'-- Produtos do {restaurant.name_restaurant} --')
-        #print(f'-- Comissão atual: {current_commission} --')
         product_list = self.show_product_list(restaurant)
         
         if product_list is None:
@@ -170,6 +174,7 @@ class App:
                     Utils.clear_screen()
                     print('Esta opção não é valida, digite um dos números acima.')
         else:
+            print(f'Existem {len(product_list)} produtos.')
             for product in product_list:
                 print(f'-- {product.name_product:<20} -- ID: {product.pk:<5} -- Preço: {product.price/100:.2f}')
             while True:
@@ -209,17 +214,23 @@ class App:
                            
     def show_insert_product(self, restaurant):
         """ Insere um produto. """
-        print('-- Cadastrar produto --')
         
         name_product = ''
         while not Product.verify_name_product(name_product):
-            print('*Nome deve conter pelo menos 5 caracteres.')
+            Utils.clear_screen()
+            print('-- Cadastrar produto --')
+            print('*Nome não pode conter número e deve ter no mínimo 5 caracteres.')
             name_product = input('Produto: ')
 
         price = 0
         while not Product.verify_price(price):
             print('*Digite o valor em centavos')
-            price = int(input('Preço: '))
+            try:
+                price = int(input('Preço: '))
+            except ValueError:
+                Utils.clear_screen()
+                print('-- Cadastrar produto --')
+                pass
         
         self.current_restaurant = restaurant
         insert_product = Product(pk=None, name_product=name_product, price=price, fk_id_restaurant=restaurant.pk)
@@ -234,23 +245,38 @@ class App:
         
     def show_delete_product(self, restaurant):
         """ Deleta um produto """
-        print('-- Deletar produto --')
-        product_list = self.show_product_list(restaurant)
-        for product in product_list:
-                print(f'-- {product.name_product:<20} -- ID: {product.pk:<5} -- Preço: {product.price/100:.2f}')
-        
-        pk_product = 0
-        while not int(pk_product):
-            print('*Somente números.')
-            pk_product = input('ID do produto: ')
+        valid_option = False
+        while not valid_option:
+            try:
+                Utils.clear_screen()
+                print('-- Deletar produto --')
+                product_list = self.show_product_list(restaurant)
+                for product in product_list:
+                    print(f'-- {product.name_product:<20} -- ID: {product.pk:<5} -- Preço: {product.price/100:.2f}')
             
-        app = DB("example.db")
-        DB.delete_product(app, pk_product)
-        Utils.clear_screen()
-        print(f'O produto de ID {pk_product} foi deletado.')
-        Utils.sleep(5)
-        self.show_restaurant_pannel(restaurant)
-        
+                print('*Somente números.')
+                pk_product = input('ID do produto: ')
+                pk_product = int(pk_product)
+                
+                product_exists = any(product.pk == pk_product for product in product_list)
+                if not product_exists:
+                    Utils.clear_screen()
+                    print(f'Um produto com ID {pk_product} não existe.')
+                    Utils.sleep(5)
+                    self.show_delete_product(restaurant)
+                    
+                app = DB("example.db")
+                DB.delete_product(app, pk_product, restaurant.pk)
+                Utils.clear_screen()
+                print(f'O produto de ID {pk_product} foi deletado.')
+                Utils.sleep(5)
+                self.show_restaurant_pannel(restaurant)
+                valid_option = True
+                
+                
+            except ValueError:
+                print('*Somente valores inteiros.')
+            
             
             
     def show_alter_commission(self, restaurant):
@@ -262,7 +288,14 @@ class App:
         pk = restaurant.pk
         while not int(new_commission) and Restaurant.verify_commission(new_commission):
             print('Em porcentagem, de 0 a 100.')
-            new_commission = input('Nova comissão: ')
+            
+            try:
+                print(f'Atual: {restaurant.comission}%')
+                new_commission = int(input('Comissão (em porcentagem): '))
+            except ValueError:
+                Utils.clear_screen()
+                DB.show_highest_commission(app) 
+                pass
             
         DB.alter_commission(app, pk, new_commission)
         Utils.clear_screen()

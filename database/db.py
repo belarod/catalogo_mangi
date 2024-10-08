@@ -114,14 +114,14 @@ class DB:
         
         
         
-    def delete_product(self, pk: int):
+    def delete_product(self, pk_product: int, pk_restaurant: int):
         """ Deleta produto no DB, de acordo com inputs do app. """
         cur = self.connection.cursor()
         
         cur.execute('''
                 DELETE FROM product
-                WHERE id = ?
-                ''', (pk,))
+                WHERE id = ? and fk_id_restaurant = ?
+                ''', (pk_product, pk_restaurant))
         
         self.connection.commit()
         cur.close()
@@ -155,7 +155,7 @@ class DB:
         highest_commission = cur.fetchone()
         
         if highest_commission:
-            print(f"The highest commission is: {highest_commission[0]}")
+            print(f"A maior comissão entre todos os restaurantes é de {highest_commission[0]}%!")
             return highest_commission
         
         cur.close()
@@ -223,3 +223,22 @@ class DB:
         if record is None:
             return False
         return True
+    
+    
+    
+    def verify_existing_product(self, pk: str):
+        """ Consulta no DB se já existe o parâmetro (email) cadastrado. Retorna True, se não existe, False, se já existe. """
+        cur = self.connection.cursor()
+    
+        cur.execute('''
+                        SELECT id
+                        FROM product
+                        WHERE fk_id_restaurant = ?
+                        ''', (pk,))
+    
+        record = cur.fetchone()
+        cur.close()
+        
+        if record is not None:
+            return True
+        return False

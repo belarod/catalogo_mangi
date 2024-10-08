@@ -14,7 +14,8 @@ class Product:
     @staticmethod
     def verify_name_product(name_product):
         """ Verifica se nome do produto tem 5 ou mais letras. """
-        if len(name_product) >= 5:
+        if len(name_product) >= 5 and not any(char.isdigit() for char in name_product): 
+            #checa se algum caractere na var name_product é um digito
             return True
         return False
     
